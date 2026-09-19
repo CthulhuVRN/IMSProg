@@ -191,7 +191,7 @@ jobs:
           do
             CONTENTS_DIR_PATH="dmg_staging/${APP}.app/Contents"
             BINARY_PATH="${CONTENTS_DIR_PATH}/MacOS/${APP}"
-            ICONSET_PATH="${CONTENTS_DIR_PATH}/Resources"
+            ICONSET_PATH="${CONTENTS_DIR_PATH}/Resources/${APP}.icns"
             
             mkdir -p "${CONTENTS_DIR_PATH}/MacOS"
             mkdir -p "${CONTENTS_DIR_PATH}/Resources"
@@ -202,21 +202,21 @@ jobs:
                 
                 ICON_PATH="${APP}_programmer/img/${APP}64.png"
                 do_iconset ${ICON_PATH} ${ICONSET_PATH}
-                do_plist ${CONTENTS_DIR_PATH} ${ICON_PATH} ${BINARY_PATH}
+                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${BINARY_PATH}
                 ;;
               IMSProg_editor)
                 cp build/${APP}/${APP} ${BINARY_PATH}
                 
                 ICON_PATH="${APP}/img/chipEdit64.png"
                 do_iconset ${ICON_PATH} ${ICONSET_PATH}
-                do_plist ${CONTENTS_DIR_PATH} ${ICON_PATH} ${BINARY_PATH}
+                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${BINARY_PATH}
                 ;;
               IMSProg_database_update)
                 cp build/${APP}/${APP} ${BINARY_PATH}
                 
                 ICON_PATH="${APP}/img/${APP}.png"
                 do_iconset ${ICON_PATH} ${ICONSET_PATH}
-                do_plist ${CONTENTS_DIR_PATH} ${ICON_PATH} ${BINARY_PATH}
+                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${BINARY_PATH}
                 ;;
             esac
           done
