@@ -164,7 +164,7 @@ jobs:
             sips -z 512 512 -s format png "${ICON_PATH}" --out icon.iconset/icon_256x256@2x.png
 
             iconutil -c icns icon.iconset -o "${ICONSET_PATH}"
-            rm -rf iconset
+            rm -rf icon.iconset
           }
 
           do_plist() {
