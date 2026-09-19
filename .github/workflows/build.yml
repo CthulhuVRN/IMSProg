@@ -133,10 +133,6 @@ jobs:
           brew upgrade
           brew install qt@6 libusb pkg-config libftdi
 
-      - name: Install xcode command line tools
-        run: |
-          xcode-select --install
-
       - name: Configure CMake
         run: |
           export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
