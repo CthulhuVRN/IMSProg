@@ -144,8 +144,7 @@ jobs:
 
       - name: Build Application
         run: |
-          bash build_all.sh
-          bash create_macos_appbundles.sh
+          cmake --build build --config Release --parallel
 
       - name: Prepare Deployment Artifacts (Create Multi-App DMG)
         run: |
@@ -154,6 +153,7 @@ jobs:
           
           # 2. Find and copy ALL three compiled .app bundles into the staging directory
           echo "Locating and copying all Qt .app bundles..."
+          ls -l build
           find build -name "IMSProg.app" -type d -exec cp -r {} dmg_staging/ \; || true
           find build -name "IMSProg_editor.app" -type d -exec cp -r {} dmg_staging/ \; || true
           find build -name "IMSProg_database_update.app" -type d -exec cp -r {} dmg_staging/ \; || true
@@ -167,9 +167,9 @@ jobs:
           mkdir -p dmg_staging/IMSProg_database_update.app/Contents/Resources
           
           # Copy your existing icons into the bundles (adjust paths if they are located elsewhere)
-          cp IMSProg_programmer/IMSProg64.png dmg_staging/IMSProg.app/Contents/Resources/ || true
-          cp IMSProg_editor/chipEdit64.png dmg_staging/IMSProg_editor.app/Contents/Resources/ || true
-          cp IMSProg_database_update/IMSProg_database_update.png dmg_staging/IMSProg_database_update.app/Contents/Resources/ || true
+          cp IMSProg_programmer/img/IMSProg64.png dmg_staging/IMSProg.app/Contents/Resources/ || true
+          cp IMSProg_editor/img/chipEdit64.png dmg_staging/IMSProg_editor.app/Contents/Resources/ || true
+          cp IMSProg_database_update/img/IMSProg_database_update.png dmg_staging/IMSProg_database_update.app/Contents/Resources/ || true
 
           # 4. Inject runtime environment overrides so deployment utilities find the dynamic libusb
           export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
