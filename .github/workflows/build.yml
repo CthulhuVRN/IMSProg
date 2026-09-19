@@ -189,9 +189,9 @@ jobs:
             IMSProg_editor \
             IMSProg_database_update
           do
-            local CONTENTS_DIR_PATH="dmg_staging/$APP.app/Contents"
-            local BINARY_PATH="$CONTENTS_DIR_PATH/MacOS/$APP"
-            local ICONSET_PATH="$CONTENTS_DIR_PATH/Resources"
+            CONTENTS_DIR_PATH="dmg_staging/$APP.app/Contents"
+            BINARY_PATH="$CONTENTS_DIR_PATH/MacOS/$APP"
+            ICONSET_PATH="$CONTENTS_DIR_PATH/Resources"
             
             mkdir -p "$CONTENTS_DIR_PATH/MacOS"
             mkdir -p "$CONTENTS_DIR_PATH/Resources"
@@ -200,21 +200,21 @@ jobs:
               IMSProg)
                 cp build/$APP_programmer/$APP $BINARY_PATH
                 
-                local ICON_PATH="IMSProg_programmer/img/IMSProg64.png"
+                ICON_PATH="IMSProg_programmer/img/IMSProg64.png"
                 do_iconset $ICON_PATH $ICONSET_PATH
                 do_plist $CONTENTS_DIR_PATH $ICON_PATH $BINARY_PATH
                 ;;
               IMSProg_editor)
                 cp build/$APP/$APP $BINARY_PATH
                 
-                local ICON_PATH="IMSProg_editor/img/chipEdit64.png"
+                ICON_PATH="IMSProg_editor/img/chipEdit64.png"
                 do_iconset $ICON_PATH $ICONSET_PATH
                 do_plist $CONTENTS_DIR_PATH $ICON_PATH $BINARY_PATH
                 ;;
               IMSProg_database_update)
                 cp build/$APP/$APP $BINARY_PATH
                 
-                local ICON_PATH="IMSProg_database_update/img/IMSProg_database_update.png"
+                ICON_PATH="IMSProg_database_update/img/IMSProg_database_update.png"
                 do_iconset $ICON_PATH $ICONSET_PATH
                 do_plist $CONTENTS_DIR_PATH $ICON_PATH $BINARY_PATH
                 ;;
