@@ -145,6 +145,10 @@ jobs:
       - name: Build Application
         run: |
           cmake --build build --config Release --parallel
+          mkdir -p build/IMSProg.app/Contents/MacOS build/IMSProg_editor.app/Contents/MacOS build/IMSProg_database_update.app/Contents/MacOS
+          cp -a build/IMSProg_programmer/IMSProg build/IMSProg.app/Contents/MacOS/
+          cp -a build/IMSProg_editor/IMSProg_editor build/IMSProg_editor.app/Contents/MacOS/
+          cp -a build/IMSProg_database_update/IMSProg_database_update build/IMSProg_database_update.app/Contents/MacOS/
 
       - name: Prepare Deployment Artifacts (Create Multi-App DMG)
         run: |
@@ -154,9 +158,9 @@ jobs:
           # 2. Find and copy ALL three compiled .app bundles into the staging directory
           echo "Locating and copying all Qt .app bundles..."
           ls -lR build
-          find build -name "IMSProg" -type d -exec cp -r {} dmg_staging/IMSProg.app \; || true
-          find build -name "IMSProg_editor" -type d -exec cp -r {} dmg_staging/IMSProg_editor.app \; || true
-          find build -name "IMSProg_database_update" -type d -exec cp -r {} dmg_staging/IMSProg_database_update.app \; || true
+          find build -name "IMSProg.app" -type d -exec cp -r {} dmg_staging/ \; || true
+          find build -name "IMSProg_editor.app" -type d -exec cp -r {} dmg_staging/ \; || true
+          find build -name "IMSProg_database_update.app" -type d -exec cp -r {} dmg_staging/ \; || true
 
           # 3. Handle icon integration for each separate app bundle
           # macOS requires standard Apple icon resources (.icns). If your source tree contains them, 
