@@ -145,46 +145,92 @@ jobs:
       - name: Build Application
         run: |
           cmake --build build --config Release --parallel
-          mkdir -p build/IMSProg.app/Contents/MacOS build/IMSProg_editor.app/Contents/MacOS build/IMSProg_database_update.app/Contents/MacOS
-          cp -a build/IMSProg_programmer/IMSProg build/IMSProg.app/Contents/MacOS/
-          cp -a build/IMSProg_editor/IMSProg_editor build/IMSProg_editor.app/Contents/MacOS/
-          cp -a build/IMSProg_database_update/IMSProg_database_update build/IMSProg_database_update.app/Contents/MacOS/
 
       - name: Prepare Deployment Artifacts (Create Multi-App DMG)
         run: |
-          # 1. Create a clean staging layout for our final disk image
-          mkdir -p dmg_staging
-          
-          # 2. Find and copy ALL three compiled .app bundles into the staging directory
-          echo "Locating and copying all Qt .app bundles..."
-          ls -lR build
-          find build -name "IMSProg.app" -type d -exec cp -r {} dmg_staging/ \; || true
-          find build -name "IMSProg_editor.app" -type d -exec cp -r {} dmg_staging/ \; || true
-          find build -name "IMSProg_database_update.app" -type d -exec cp -r {} dmg_staging/ \; || true
+          # 0. Prepare some reusable functions
+          do_iconset() {
+            local IMAGE_PATH=$1
+            local ICONSET_PATH=$2
 
-          # 3. Handle icon integration for each separate app bundle
-          # macOS requires standard Apple icon resources (.icns). If your source tree contains them, 
-          # we map them directly into each application's internal bundle layout.
-          echo "Integrating custom application icons..."
-          mkdir -p dmg_staging/IMSProg.app/Contents/Resources
-          mkdir -p dmg_staging/IMSProg_editor.app/Contents/Resources
-          mkdir -p dmg_staging/IMSProg_database_update.app/Contents/Resources
-          
-          # Copy your existing icons into the bundles (adjust paths if they are located elsewhere)
-          cp IMSProg_programmer/img/IMSProg64.png dmg_staging/IMSProg.app/Contents/Resources/ || true
-          cp IMSProg_editor/img/chipEdit64.png dmg_staging/IMSProg_editor.app/Contents/Resources/ || true
-          cp IMSProg_database_update/img/IMSProg_database_update.png dmg_staging/IMSProg_database_update.app/Contents/Resources/ || true
+            mkdir image_iconset
+            sips -z 16 16 -s format png "$IMAGE_PATH" --out icon.iconset/icon_16x16.png
+            sips -z 32 32 -s format png "$IMAGE_PATH" --out icon.iconset/icon_16x16@2x.png
+            sips -z 32 32 -s format png "$IMAGE_PATH" --out icon.iconset/icon_32x32.png
+            sips -z 64 64 -s format png "$IMAGE_PATH" --out icon.iconset/icon_32x32@2x.png
+            sips -z 128 128 -s format png "$IMAGE_PATH" --out icon.iconset/icon_128x128.png
+            sips -z 256 256 -s format png "$IMAGE_PATH" --out icon.iconset/icon_128x128@2x.png
+            sips -z 256 256 -s format png "$IMAGE_PATH" --out icon.iconset/icon_256x256.png
+            sips -z 512 512 -s format png "$IMAGE_PATH" --out icon.iconset/icon_256x256@2x.png
 
-          # 4. Inject runtime environment overrides so deployment utilities find the dynamic libusb
+            iconutil -c icns image_iconset -o "$ICONSET_PATH"
+            rm -rf image_iconset
+          }
+
+          do_plist() {
+            local CONTENTS_DIR_PATH=$1
+            local ICON_PATH=$2
+            local BINARY_PATH=$3
+          
+            /usr/libexec/PlistBuddy -c 'Add :CFBundleDevelopmentRegion string English' "$CONTENTS_DIR_PATH/Info.plist" 1>/dev/null
+            /usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string $ICON_PATH" "$CONTENTS_DIR_PATH/Info.plist"
+            /usr/libexec/PlistBuddy -c 'Add :CFBundleInfoDictionaryVersion string 6.0' "$CONTENTS_DIR_PATH/Info.plist"
+            /usr/libexec/PlistBuddy -c 'Add :CFBundlePackageType string APPL' "$CONTENTS_DIR_PATH/Info.plist"
+            /usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 0.2' "$CONTENTS_DIR_PATH/Info.plist"
+            /usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 0.2-10' "$CONTENTS_DIR_PATH/Info.plist"
+            /usr/libexec/PlistBuddy -c 'Add :NSPrincipalClass string NSApplication' "$CONTENTS_DIR_PATH/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string $BINARY_PATH" "$CONTENTS_DIR_PATH/Info.plist"
+            /usr/libexec/PlistBuddy -c 'Add :LSUIElement bool true' "$CONTENTS_DIR_PATH/Info.plist"
+          }
+        
+          # 1. Prepare staging app bundles for our final disk image
+          for APP in \
+            IMSProg \
+            IMSProg_editor \
+            IMSProg_database_update
+          do
+            local CONTENTS_DIR_PATH="dmg_staging/$APP.app/Contents"
+            local BINARY_PATH="$CONTENTS_DIR_PATH/MacOS/$APP"
+            local ICONSET_PATH="$CONTENTS_DIR_PATH/Resources"
+            
+            mkdir -p "$CONTENTS_DIR_PATH/MacOS"
+            mkdir -p "$CONTENTS_DIR_PATH/Resources"
+            
+            case $APP in
+              IMSProg)
+                cp build/$APP_programmer/$APP $BINARY_PATH
+                
+                local ICON_PATH="IMSProg_programmer/img/IMSProg64.png"
+                do_iconset $ICON_PATH $ICONSET_PATH
+                do_plist $CONTENTS_DIR_PATH $ICON_PATH $BINARY_PATH
+                ;;
+              IMSProg_editor)
+                cp build/$APP/$APP $BINARY_PATH
+                
+                local ICON_PATH="IMSProg_editor/img/chipEdit64.png"
+                do_iconset $ICON_PATH $ICONSET_PATH
+                do_plist $CONTENTS_DIR_PATH $ICON_PATH $BINARY_PATH
+                ;;
+              IMSProg_database_update)
+                cp build/$APP/$APP $BINARY_PATH
+                
+                local ICON_PATH="IMSProg_database_update/img/IMSProg_database_update.png"
+                do_iconset $ICON_PATH $ICONSET_PATH
+                do_plist $CONTENTS_DIR_PATH $ICON_PATH $BINARY_PATH
+                ;;
+            esac
+          done
+            
+          # 2. Inject runtime environment overrides so deployment utilities find the dynamic libusb
           export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
 
-          # 5. Run macdeployqt on every application sequentially to bundle dependencies standalone
+          # 3. Run macdeployqt on every application sequentially to bundle dependencies standalone
           echo "Processing standalone dependencies with macdeployqt..."
           $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg.app
           $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg_editor.app
           $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg_database_update.app
 
-          # 6. Create the final unified graphical DMG image containing all three configured apps
+          # 4. Create the final unified graphical DMG image containing all three configured apps
           # We use the built-in hdiutil tool to generate a professional distribution image
           echo "Compiling the final unified multi-app DMG file..."
           hdiutil create -volname "IMSProg Programmer Suite" -srcfolder dmg_staging -ov -format UDZO imsprog-macos-arm64.dmg
