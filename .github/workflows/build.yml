@@ -153,33 +153,33 @@ jobs:
             local ICON_PATH=$1
             local ICONSET_PATH=$2
 
-            mkdir iconset
-            sips -z 16 16 -s format png "${ICON_PATH}" --out iconset/icon_16x16.png
-            sips -z 32 32 -s format png "${ICON_PATH}" --out iconset/icon_16x16@2x.png
-            sips -z 32 32 -s format png "${ICON_PATH}" --out iconset/icon_32x32.png
-            sips -z 64 64 -s format png "${ICON_PATH}" --out iconset/icon_32x32@2x.png
-            sips -z 128 128 -s format png "${ICON_PATH}" --out iconset/icon_128x128.png
-            sips -z 256 256 -s format png "${ICON_PATH}" --out iconset/icon_128x128@2x.png
-            sips -z 256 256 -s format png "${ICON_PATH}" --out iconset/icon_256x256.png
-            sips -z 512 512 -s format png "${ICON_PATH}" --out iconset/icon_256x256@2x.png
+            mkdir icon.iconset
+            sips -z 16 16 -s format png "${ICON_PATH}" --out icon.iconset/icon_16x16.png
+            sips -z 32 32 -s format png "${ICON_PATH}" --out icon.iconset/icon_16x16@2x.png
+            sips -z 32 32 -s format png "${ICON_PATH}" --out icon.iconset/icon_32x32.png
+            sips -z 64 64 -s format png "${ICON_PATH}" --out icon.iconset/icon_32x32@2x.png
+            sips -z 128 128 -s format png "${ICON_PATH}" --out icon.iconset/icon_128x128.png
+            sips -z 256 256 -s format png "${ICON_PATH}" --out icon.iconset/icon_128x128@2x.png
+            sips -z 256 256 -s format png "${ICON_PATH}" --out icon.iconset/icon_256x256.png
+            sips -z 512 512 -s format png "${ICON_PATH}" --out icon.iconset/icon_256x256@2x.png
 
-            iconutil -c icns iconset -o "${ICONSET_PATH}"
+            iconutil -c icns icon.iconset -o "${ICONSET_PATH}"
             rm -rf iconset
           }
 
           do_plist() {
             local CONTENTS_DIR_PATH=$1
-            local ICONSET_PATH=$2
-            local BINARY_PATH=$3
+            local ICONSET=$2
+            local BINARY=$3
           
             /usr/libexec/PlistBuddy -c 'Add :CFBundleDevelopmentRegion string English' "${CONTENTS_DIR_PATH}/Info.plist" 1>/dev/null
-            /usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string ${ICONSET_PATH}" "${CONTENTS_DIR_PATH}/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string ${ICONSET}" "${CONTENTS_DIR_PATH}/Info.plist"
             /usr/libexec/PlistBuddy -c 'Add :CFBundleInfoDictionaryVersion string 6.0' "${CONTENTS_DIR_PATH}/Info.plist"
             /usr/libexec/PlistBuddy -c 'Add :CFBundlePackageType string APPL' "${CONTENTS_DIR_PATH}/Info.plist"
             /usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 0.2' "${CONTENTS_DIR_PATH}/Info.plist"
             /usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 0.2-10' "${CONTENTS_DIR_PATH}/Info.plist"
             /usr/libexec/PlistBuddy -c 'Add :NSPrincipalClass string NSApplication' "${CONTENTS_DIR_PATH}/Info.plist"
-            /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string ${BINARY_PATH}" "${CONTENTS_DIR_PATH}/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string ${BINARY}" "${CONTENTS_DIR_PATH}/Info.plist"
             /usr/libexec/PlistBuddy -c 'Add :LSUIElement bool true' "${CONTENTS_DIR_PATH}/Info.plist"
           }
         
@@ -202,21 +202,21 @@ jobs:
                 
                 ICON_PATH="${APP}_programmer/img/${APP}64.png"
                 do_iconset ${ICON_PATH} ${ICONSET_PATH}
-                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${BINARY_PATH}
+                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${APP}
                 ;;
               IMSProg_editor)
                 cp build/${APP}/${APP} ${BINARY_PATH}
                 
                 ICON_PATH="${APP}/img/chipEdit64.png"
                 do_iconset ${ICON_PATH} ${ICONSET_PATH}
-                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${BINARY_PATH}
+                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${APP}
                 ;;
               IMSProg_database_update)
                 cp build/${APP}/${APP} ${BINARY_PATH}
                 
                 ICON_PATH="${APP}/img/${APP}.png"
                 do_iconset ${ICON_PATH} ${ICONSET_PATH}
-                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${BINARY_PATH}
+                do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${APP}
                 ;;
             esac
           done
