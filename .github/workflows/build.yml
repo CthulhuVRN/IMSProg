@@ -130,7 +130,12 @@ jobs:
       - name: Install dependencies via Homebrew
         run: |
           HOMEBREW_NO_INSTALL_FROM_API=1 brew update
+          brew upgrade
           brew install qt@6 libusb pkg-config libftdi
+
+      - name: Install xcode command line tools
+        run: |
+          xcode-select --install
 
       - name: Configure CMake
         run: |
@@ -143,7 +148,8 @@ jobs:
 
       - name: Build Application
         run: |
-          cmake --build build --config Release --parallel
+          bash build_all.sh
+          bash create_macos_appbundles.sh
 
       - name: Prepare Deployment Artifacts (Create Multi-App DMG)
         run: |
