@@ -129,9 +129,8 @@ jobs:
 
       - name: Install dependencies via Homebrew
         run: |
-          HOMEBREW_NO_INSTALL_FROM_API=1 brew update
-          brew upgrade
-          brew install qt@6 libusb pkg-config libftdi
+          brew update
+          brew install -y qt@6 libusb pkg-config libftdi
 
       - name: Configure CMake
         run: |
@@ -182,6 +181,9 @@ jobs:
             /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string ${BINARY}" "${CONTENTS_DIR_PATH}/Info.plist"
             /usr/libexec/PlistBuddy -c 'Add :LSUIElement bool true' "${CONTENTS_DIR_PATH}/Info.plist"
           }
+
+          export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
+          export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
         
           # 1. Prepare staging app bundles for our final disk image
           for APP in \
@@ -219,16 +221,19 @@ jobs:
                 do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${APP}
                 ;;
             esac
+
+            echo "Processing ${APP} standalone dependencies with macdeployqt..."
+	          $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/${APP}.app
           done
             
           # 2. Inject runtime environment overrides so deployment utilities find the dynamic libusb
-          export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+          #export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
 
           # 3. Run macdeployqt on every application sequentially to bundle dependencies standalone
-          echo "Processing standalone dependencies with macdeployqt..."
-          $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg.app
-          $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg_editor.app
-          $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg_database_update.app
+          #echo "Processing standalone dependencies with macdeployqt..."
+          #$(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg.app
+          #$(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg_editor.app
+          #$(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg_database_update.app
 
           # 4. Create the final unified graphical DMG image containing all three configured apps
           # We use the built-in hdiutil tool to generate a professional distribution image
