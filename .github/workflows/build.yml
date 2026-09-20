@@ -221,9 +221,9 @@ jobs:
                 do_plist ${CONTENTS_DIR_PATH} ${APP}.icns ${APP}
                 ;;
             esac
-
-            echo "Processing ${APP} standalone dependencies with macdeployqt..."
-	          $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/${APP}.app
+            
+            echo "Processing standalone dependencies with macdeployqt..."
+            $(brew --prefix qt@6)/bin/macdeployqt dmg_staging/IMSProg.app
           done
             
           # 2. Inject runtime environment overrides so deployment utilities find the dynamic libusb
